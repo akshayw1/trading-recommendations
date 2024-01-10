@@ -37,6 +37,10 @@ export default function Ethereum() {
     IV2: 26.39,
     PutOI: "20.55.825",
   };
+  const dataFreeText = {
+    Time: "15:25-15:30",
+    FreeText: 31.89,
+  };
   const { session, status } = useOnboardingContext();
 
   const [data, setData] = useState([]);
@@ -52,6 +56,7 @@ export default function Ethereum() {
       },
     ],
   });
+  const [freeTextTable, setFreeTextTable] = useState([]);
   const updateData = async () => {
     try {
       const res = await fetch("/api/ethereum", {
@@ -77,9 +82,44 @@ export default function Ethereum() {
   };
   const addItem = () => {
     closeAllDropdown();
+    let newDataExample = { ...dataExample };
+
+    if (data.length > 0) {
+      const lastEntryTime = data[0].Time;
+      const newTime = calculateNewTime(lastEntryTime);
+      newDataExample.Time = newTime;
+    } else {
+      const currentTime = getCurrentTime();
+      newDataExample.Time = currentTime;
+    }
     let newData = [...data];
-    newData.push(dataExample);
-    setData(newData);
+    newData.unshift(newDataExample);
+    setData((prevData) => [newDataExample, ...prevData]);
+  };
+  const calculateNewTime = (lastEntryTime) => {
+    const [start, end] = lastEntryTime.split("-");
+    const endTime = new Date(`01/01/2022 ${end}`);
+    endTime.setMinutes(endTime.getMinutes() + 5);
+
+    // Obtén el tiempo de inicio en formato hh:mm
+    const formattedEndTime = endTime.toTimeString().slice(0, 5);
+    return `${end}-${formattedEndTime}`;
+  };
+
+  const getCurrentTime = () => {
+    const currentTime = new Date();
+    const currentMinutes = currentTime.getMinutes();
+
+    const roundedMinutes = Math.floor(currentMinutes / 5) * 5;
+
+    currentTime.setMinutes(roundedMinutes);
+
+    const formattedStartTime = currentTime.toTimeString().slice(0, 5);
+
+    currentTime.setMinutes(roundedMinutes + 5);
+    const formattedEndTime = currentTime.toTimeString().slice(0, 5);
+
+    return `${formattedStartTime}-${formattedEndTime}`;
   };
   const deleteItem = (index) => {
     closeAllDropdown();
@@ -102,19 +142,29 @@ export default function Ethereum() {
   }, []);
 
   useEffect(() => {
+    const reversedData = [...data].reverse();
+
     setTableData({
-      labels: data.map((item) => item.Time),
+      labels: reversedData.map((item) => item.Time),
       datasets: [
         {
           label: "Users Gained",
-          data: data.map((item) => item.IV1),
+          data: reversedData.map((item, i) => item.Strike * (i + 1) * 10000),
           backgroundColor: ["white"],
           borderColor: "#a33131",
+          borderWidth: 2,
+        },
+        {
+          label: "Users Loss",
+          data: reversedData.map((item, i) => item.Strike * i * 15000),
+          backgroundColor: ["white"],
+          borderColor: "#e2b75a",
           borderWidth: 2,
         },
       ],
     });
   }, [data]);
+
   const getData = async () => {
     try {
       const res = await fetch("/api/ethereum", {
@@ -157,12 +207,13 @@ export default function Ethereum() {
   };
   const options = {
     type: "line",
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
   };
   return (
     <main className={`${styles.main}`}>
-      <div className="w-full flex items-center xl:flex-row flex-col">
-        <div className="xl:w-[50%] w-full">
+      <h1 className={styles.zigZagText}> Zig Zag Moves - STAY AWAY</h1>
+      <div className="w-full flex lg:flex-row flex-col">
+        <div className="scrollbar1 overflow-x-scroll lg:w-[35vw] w-full h-[max-content] pb-44">
           <table>
             <thead>
               <tr>
@@ -175,7 +226,7 @@ export default function Ethereum() {
             </thead>
             <tbody>
               {data.map((item, index) => (
-                <tr key={index}>
+                <tr key={item.Time}>
                   <td className="flex flex-row gap-2">
                     {session && session.user.admin ? (
                       <div
@@ -437,28 +488,114 @@ export default function Ethereum() {
                   </td>
                 </tr>
               ))}
+              {session && session.user.admin ? (
+                <tr>
+                  <td colSpan="5">
+                    <div className="flex flex-start">
+                      <button
+                        onClick={addItem}
+                        className="w-48 text-center bg-green-800 h-12 hover:bg-green-700"
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={updateData}
+                        className="w-48 text-center bg-blue-700 h-12 hover:bg-blue-600"
+                      >
+                        Update
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
-          {session && session.user.admin ? (
-            <>
-              <button
-                onClick={addItem}
-                className="w-full text-center bg-green-800 h-12 hover:bg-green-700"
-              >
-                +
-              </button>
-              <button
-                onClick={updateData}
-                className="w-full text-center bg-blue-700 h-12 hover:bg-blue-600"
-              >
-                Update
-              </button>
-            </>
-          ) : null}
         </div>
-        <div className="xl:w-[50%] m-auto w-full flex order-first xl:order-none max-w-[700px] pl-[50px] bg-[#161a1e]">
-          <Line options={options} datasetIdKey="id" data={tableData} />
+        <div
+          className="lg:w-[65vw] w-full flex order-first lg:order-none 
+        max-lg:h-[40vh] max-lg:max-h-[350px]"
+        >
+          <Line
+            className="bg-[#161a1e] pt-4 lg:pl-4"
+            options={options}
+            datasetIdKey="id"
+            data={tableData}
+          />
         </div>
+      </div>
+      <div className="scrollbar1 overflow-x-scroll lg:w-[35vw] w-full h-[max-content] pb-44">
+        <table>
+          <thead>
+            <tr>
+              <th>N</th>
+              <th>Time</th>
+              <th>Free text</th>
+            </tr>
+          </thead>
+          <tbody>
+            {freeTextTable.map((item, index) => (
+              <tr key={item.Time}>
+                <td className="flex flex-row gap-2">
+                  {session && session.user.admin ? (
+                    <div
+                      onClick={() => deleteItem(index)}
+                      className="cursor-pointer w-6 flex justify-center items-center rounded h-6 bg-red-600"
+                    >
+                      X
+                    </div>
+                  ) : null}
+                  {index + 1}
+                </td>
+                <td>
+                  {session && !session.user.admin ? (
+                    item.Time
+                  ) : (
+                    <input
+                      onChange={(e) => onChange(e.target.value, "Time", index)}
+                      defaultValue={item.Time}
+                      className={styles.inputTable}
+                      type="text"
+                    />
+                  )}
+                </td>
+                <td>
+                  {session && !session.user.admin ? (
+                    item.Strike
+                  ) : (
+                    <input
+                      onChange={(e) =>
+                        onChange(e.target.value, "Strike", index)
+                      }
+                      defaultValue={item.Strike}
+                      className={styles.inputTable}
+                      type="text"
+                    />
+                  )}
+                </td>
+              </tr>
+            ))}
+            {session && session.user.admin ? (
+              <tr>
+                <td colSpan="5">
+                  <div className="flex flex-start">
+                    <button
+                      onClick={addItem}
+                      className="w-48 text-center bg-green-800 h-12 hover:bg-green-700"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={updateData}
+                      className="w-48 text-center bg-blue-700 h-12 hover:bg-blue-600"
+                    >
+                      Update
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
       </div>
     </main>
   );

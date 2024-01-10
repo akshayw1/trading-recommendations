@@ -1,12 +1,13 @@
 "use client";
 import Image from "next/image";
 import styles from "./styles.module.css";
-import { usePathname } from "next/navigation";
-import pagesWithTable from "../header/pagesWithTable";
+
+import { useOnboardingContext } from "@/context/MyContext";
 
 export default function Footer() {
-  const pathname = usePathname();
-  const hideAside = pagesWithTable.includes(pathname) ? true : false;
+  const { session, status, setMenuOpen, menuOpen, hideAside, onTable } =
+    useOnboardingContext();
+
   return (
     <footer className={`${hideAside ? styles.onTable : ""} ${styles.footer}`}>
       <Image alt="logo" width={198} height={122} src="/images/Logo.png"></Image>

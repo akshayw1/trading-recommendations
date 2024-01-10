@@ -5,21 +5,17 @@ import Link from "next/link";
 import Button1 from "../buttons/button1";
 import Button2 from "../buttons/button2";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { useOnboardingContext } from "@/context/MyContext";
-import pagesWithTable from "./pagesWithTable";
 
 export default function Aside() {
-  const { session, status } = useOnboardingContext();
-  const pathname = usePathname();
-  const hideAside = pagesWithTable.includes(pathname) ? true : false;
-  const [menuOption, setMenuOption] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { session, status, menuOpen, setMenuOpen, hideAside } =
+    useOnboardingContext();
+  const [menuOption, setMenuOption] = useState(false);
 
   return (
     <>
       <Image
-        onClick={() => setMenuOpen(true)}
+        onClick={() => setMenuOpen(!menuOpen)}
         className={`${styles.mobile} ${styles.menuIcon}`}
         alt="menu"
         width={256}
@@ -56,7 +52,7 @@ export default function Aside() {
         />
         <div className={`${styles.menuOptions} ${styles.mobile}`}>
           <Button1
-            onClick={() => toggleMenuOption(0)}
+            onClick={() => setMenuOption(false)}
             style2={{
               fontWeight: 600,
               fontSize: "1.5rem",
@@ -69,7 +65,7 @@ export default function Aside() {
             Crypto
           </Button1>
           <Button1
-            onClick={() => toggleMenuOption(1)}
+            onClick={() => setMenuOption(true)}
             style2={{
               fontWeight: 600,
               fontSize: "1.5rem",
@@ -84,7 +80,7 @@ export default function Aside() {
         </div>
         <ul
           className={`${styles.mobile} ${styles.navMenu} ${
-            menuOption === 1 ? styles.menuSelected : ""
+            menuOption ? styles.menuSelected : ""
           }`}
         >
           <li>
@@ -113,7 +109,7 @@ export default function Aside() {
             </Link>
           </li>
         </ul>
-        <ul className={`${menuOption === 0 ? styles.menuSelected : ""}`}>
+        <ul className={`${!menuOption ? styles.menuSelected : ""}`}>
           <li className={styles.blue}>Futures & Options OI</li>
           <li>
             <Link
@@ -372,31 +368,33 @@ export default function Aside() {
             </li>
           ) : null}
         </ul>
-        <div className={`${styles.authBox} ${styles.mobile}`}>
-          <Link onClick={() => setMenuOpen(false)} href="/auth/login">
-            <Button1
-              style2={{
-                fontWeight: 600,
-                fontSize: "1.5rem",
-                height: 46,
-              }}
-              borderSize={3}
-            >
-              Log in
-            </Button1>
-          </Link>
-          <Link onClick={() => setMenuOpen(false)} href="/auth/signup">
-            <Button2
-              style2={{
-                fontWeight: 600,
-                fontSize: "1.5rem",
-                height: 46,
-              }}
-            >
-              Sign up
-            </Button2>
-          </Link>
-        </div>
+        {session ? null : (
+          <div className={`${styles.authBox} ${styles.mobile}`}>
+            <Link onClick={() => setMenuOpen(false)} href="/auth/login">
+              <Button1
+                style2={{
+                  fontWeight: 600,
+                  fontSize: "1.5rem",
+                  height: 46,
+                }}
+                borderSize={3}
+              >
+                Log in
+              </Button1>
+            </Link>
+            <Link onClick={() => setMenuOpen(false)} href="/auth/signup">
+              <Button2
+                style2={{
+                  fontWeight: 600,
+                  fontSize: "1.5rem",
+                  height: 46,
+                }}
+              >
+                Sign up
+              </Button2>
+            </Link>
+          </div>
+        )}
       </aside>
     </>
   );

@@ -6,15 +6,39 @@ import Link from "next/link";
 import Image from "next/image";
 import { useOnboardingContext } from "@/context/MyContext";
 import { signOut } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import pagesWithTable from "../header/pagesWithTable";
+
 export default function Nav() {
-  const { session, status } = useOnboardingContext();
-  const pathname = usePathname();
-  const hideAside = pagesWithTable.includes(pathname) ? true : false;
+  const { session, status, setMenuOpen, menuOpen, hideAside, onTable } =
+    useOnboardingContext();
 
   return (
-    <nav className={`${styles.nav} ${hideAside ? styles.onTable : ""}`}>
+    <nav
+      className={`${styles.nav} ${onTable ? styles.menuOnTable : ""} ${
+        hideAside ? styles.onTable : ""
+      }`}
+    >
+      <div
+        onClick={() => setMenuOpen(!menuOpen)}
+        className={`${onTable ? styles.onTable : ""} ${
+          styles.menuBtn
+        } hidden cursor-pointer`}
+      >
+        {menuOpen ? (
+          <Image
+            width={48}
+            height={48}
+            alt="hide button"
+            src="/images/nav/double-arrow-left-svgrepo-com.png"
+          />
+        ) : (
+          <Image
+            width={48}
+            height={48}
+            alt="menu button"
+            src="/images/nav/menu-svgrepo-com.png"
+          />
+        )}
+      </div>
       <ul className={styles.desktop}>
         <li>
           <Link href="/guide">Guide</Link>

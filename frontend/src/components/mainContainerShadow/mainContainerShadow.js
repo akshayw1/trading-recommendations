@@ -1,11 +1,10 @@
 "use client";
 import { useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import pagesWithTable from "../header/pagesWithTable";
+import { useOnboardingContext } from "@/context/MyContext";
 
 export default function MainContainerShadow({ children }) {
-  const pathname = usePathname();
-  const hideAside = pagesWithTable.includes(pathname) ? true : false;
+  const { hideAside } = useOnboardingContext();
+
   const shadowMainRef = useRef(null);
   useEffect(() => {
     const updateBlurCircleBoxHeight = () => {

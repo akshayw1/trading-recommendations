@@ -3,10 +3,11 @@ import Button1 from "../buttons/button1";
 import styles from "./styles.module.css";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-import "react-toastify/dist/ReactToastify.css";
 export default function Login() {
   const router = useRouter();
 
